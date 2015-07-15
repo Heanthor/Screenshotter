@@ -6,7 +6,7 @@ public class Driver  {
 	/**
 	 * Time before program shuts off, in minutes;
 	 */
-	private static int TIME_UNTIL_SHUTOFF = 10;
+	private static int TIME_UNTIL_SHUTOFF = 2;
 	/**
 	 * If true, outputs console messages to file "ss_debug.txt"
 	 */

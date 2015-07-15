@@ -30,6 +30,10 @@ public class Screenshotter implements Runnable {
 	 */
 	private String CLIENT_ID;
 	/**
+	 * Imgur connection used to save screenshots.
+	 */
+	private Imgur imgur;
+	/**
 	 * Time (seconds) between screenshots
 	 */
 	private final int DELAY_TIME = 10;
@@ -62,6 +66,20 @@ public class Screenshotter implements Runnable {
 			BufferedReader br = new BufferedReader(new FileReader("client_id.txt"));
 			CLIENT_ID = br.readLine().trim();
 			br.close();
+			
+			imgur = new Imgur(CLIENT_ID);
+			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						System.out.println("Shutdown hook");
+						createAlbum(imgur);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				
+			}));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -100,11 +118,10 @@ public class Screenshotter implements Runnable {
 
 			try {
 				if (!SAVE) {
-					Imgur i = new Imgur(CLIENT_ID);
-					String response = i.uploadImage(imageToBase64(b));
+					String response = imgur.uploadImage(imageToBase64(b));
 					//System.out.println(response);
 
-					JSONObject o = i.parseJSON(response);
+					JSONObject o = imgur.parseJSON(response);
 					String id = o.getString("id"); //Gets the imgur ID
 					uploadedImages.add(id); //Add to collection
 					int progress = uploadedImages.size();
@@ -117,23 +134,7 @@ public class Screenshotter implements Runnable {
 
 					//Album creation check
 					if (progress == ALBUM_SIZE) {
-						String response2 = i.createNewAlbum(uploadedImages.toArray(new String[uploadedImages.size()]),
-								startStamp + " - " + stamp); //Pretty title
-						JSONObject o2 = new JSONObject(response2);
-						JSONObject o3 = o2.optJSONObject("data");
-
-						String id2 = o3.getString("id");
-						System.out.println();
-						String albumLink = "imgur.com/a/" + id2;
-						System.out.println(albumLink);
-
-						//Send link to address
-						Mailer m = new Mailer("reedtrevelyan@gmail.com",  startStamp + " - " + stamp);
-						/* Yahoo mail servers don't like emails with only a link
-						 * in the body. So we add some text to our link.*/
-						m.sendMail("Here's the link ^^ : " + albumLink, true);
-
-						uploadedImages.clear();
+						createAlbum(imgur);
 					}
 				}
 			} catch (Exception e1) {
@@ -148,6 +149,26 @@ public class Screenshotter implements Runnable {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void createAlbum(Imgur i) throws Exception {
+		String response2 = i.createNewAlbum(uploadedImages.toArray(new String[uploadedImages.size()]),
+				startStamp + " - " + stamp); //Pretty title
+		JSONObject o2 = new JSONObject(response2);
+		JSONObject o3 = o2.optJSONObject("data");
+
+		String id2 = o3.getString("id");
+		System.out.println();
+		String albumLink = "imgur.com/a/" + id2;
+		System.out.println(albumLink);
+
+		//Send link to address
+		Mailer m = new Mailer("reedtrevelyan@gmail.com",  startStamp + " - " + stamp);
+		/* Yahoo mail servers don't like emails with only a link
+		 * in the body. So we add some text to our link.*/
+		m.sendMail("Here's the link ^^ : " + albumLink, true);
+
+		uploadedImages.clear();
 	}
 
 	/**

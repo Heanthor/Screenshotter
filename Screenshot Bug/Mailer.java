@@ -47,7 +47,7 @@ public class Mailer {
 	 * Sends message using current parameters.
 	 * @param m - Message to send
 	 * @param debug - Whether or not to output JavaMail debug messages
-	 * @throws FileNotFoundException - The login info file cannot be located
+	 * @throws FileNotFoundException The login info file cannot be located
 	 */
 	public void sendMail(String m, boolean debug) throws FileNotFoundException {
 		//Form: username \n password
