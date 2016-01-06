@@ -65,23 +65,19 @@ public class Screenshotter implements Runnable {
 	 */
 	public Screenshotter() {
 		try {
-			BufferedReader br = new BufferedReader(new FileReader("client_id.txt"));
+			BufferedReader br = new BufferedReader(new FileReader("resources/client_id.txt"));
 			CLIENT_ID = br.readLine().trim();
 			br.close();
 			
 			imgur = new Imgur(CLIENT_ID);
-			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						System.out.println("Shutdown hook");
-						createAlbum(imgur);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				
-			}));
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    System.out.println("Shutdown hook");
+                    createAlbum(imgur);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -180,13 +176,11 @@ public class Screenshotter implements Runnable {
 	 * @throws IOException If the image cannot be written to the output stream.
 	 */
 	private String imageToBase64(BufferedImage i) throws IOException {
-		BufferedImage image = i;
 		ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-		ImageIO.write(image, "png", byteArray);
+		ImageIO.write(i, "png", byteArray);
 		byte[] byteImage = byteArray.toByteArray();
-		String dataImage = encodeImage(byteImage);
 
-		return dataImage;
+		return encodeImage(byteImage);
 	}
 
 	/**

@@ -53,7 +53,7 @@ public class Mailer {
 	 */
 	public void sendMail(String m, boolean debug) throws FileNotFoundException {
 		//Form: username \n password
-		BufferedReader br = new BufferedReader(new FileReader("login.txt"));
+		BufferedReader br = new BufferedReader(new FileReader("resources/login.txt"));
 		
 		String user = null;
 		String password = null;
